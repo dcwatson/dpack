@@ -49,18 +49,33 @@ class DPack:
         return {}
 
     def dump_config(self):
-        return {
-            "output": self.location,
-            "search": self.search,
-            "prefix": self.prefix,
-            "register": {name: method for name, method in self.processors.items() if name not in builtin_processors},
-            "defaults": self.defaults,
-            "concat": self.concat,
+        defaults = self.defaults.copy()
+        if defaults.get("css") == ["rewrite"]:
+            defaults.pop("css")
+        concat = self.concat.copy()
+        if concat.get("js") == "\n;\n":
+            concat.pop("js")
+        register = {name: method for name, method in self.processors.items() if name not in builtin_processors}
+        config = {
             "assets": self.assets,
         }
+        if not self.ephemeral:
+            config["output"]: self.location
+        if self.search != ["."]:
+            config["search"] = self.search
+        if self.prefix:
+            config["prefix"] = self.prefix
+        if register:
+            config["register"] = register
+        if defaults:
+            config["defaults"] = defaults
+        if concat:
+            config["concat"] = concat
+        return config
 
     def configure(self, config):
         self.location = config.get("output") or tempfile.mkdtemp(prefix="dpack-")
+        self.ephemeral = not config.get("output")
         self.search = config.get("search", ".")
         self.prefix = config.get("prefix", "")
         if isinstance(self.search, str):

@@ -26,6 +26,7 @@ setup(
         "sass": ["libsass"],
         "all": ["rcssmin", "rjsmin", "libsass"],
     },
+    entry_points={"console_scripts": ["dpack=dpack.cli:main"]},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

@@ -10,10 +10,12 @@ from .base import DPack
 
 
 class DjangoDPack(DPack):
-    def __init__(self):
+    def __init__(self, config=None, **overrides):
         dpack_setting = getattr(settings, "DPACK", None)
-        config = dpack_setting if isinstance(dpack_setting, str) else None
+        if config is None:
+            config = dpack_setting if isinstance(dpack_setting, str) else None
         options = dpack_setting if isinstance(dpack_setting, dict) else {}
+        options.update(overrides)
         if "prefix" not in options:
             options["prefix"] = settings.STATIC_URL
         super().__init__(config, **options)

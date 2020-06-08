@@ -105,6 +105,12 @@ If you compile an asset to `compiled/css/site.css`, you can reference it as you 
 `{% static "compiled/css/site.css" %}` in your templates. These assets are also then post-processed by your
 `STATICFILES_STORAGE`, so you can use things like [Whitenoise](http://whitenoise.evans.io)'s `CompressedManifestStaticFilesStorage` with no extra configuration.
 
+## Command Line Interface
+
+DPack comes with a command-line utility, unsurprisingly named `dpack`. Run by itself, it will look for a `dpack.yaml`
+config file and pack any assets it finds according to the config. You can specify a config file (`-c`) or Django
+settings module (`-s`), and dump out the loaded config using `dpack -y`. Run `dpack -h` for a full list of options.
+
 ## Processors
 
 Processors are simply Python callables that take three arguments: `text` (the processed text so far), `input` (the

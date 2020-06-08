@@ -1,4 +1,3 @@
-import logging
 import os
 
 from django.conf import settings
@@ -8,8 +7,6 @@ from django.core.checks import Warning
 from django.core.files.storage import FileSystemStorage
 
 from .base import DPack
-
-logger = logging.getLogger(__name__)
 
 
 class DjangoDPack(DPack):

@@ -1,4 +1,5 @@
 import importlib
+import logging
 import os
 import tempfile
 
@@ -6,12 +7,17 @@ import yaml
 
 from .processors import __all__ as builtin_processors
 
+logger = logging.getLogger("dpack")
+
 
 class Input:
     def __init__(self, name, path, processors=None):
         self.name = name
         self.path = path
         self.processors = processors
+
+    def __str__(self):
+        return self.name
 
     def modified(self, mtime):
         return os.path.getmtime(self.path) > mtime
@@ -110,7 +116,8 @@ class DPack:
                 if path:
                     inputs.append(Input(input_name, path, processors))
                 else:
-                    print("Input not found: {}".format(input_name))
+                    # TODO: should probably raise an exception here, with an option to ignore missing inputs.
+                    logger.error("Input not found: {}".format(input_name))
             yield name, inputs
 
     def modified(self, inputs, mtime=0):
@@ -137,6 +144,7 @@ class DPack:
                 ext = os.path.splitext(name)[1].replace(".", "").lower()
                 sep = self.concat.get(ext, "\n")
                 os.makedirs(os.path.dirname(path), exist_ok=True)
+                logger.debug("Packing {} <<< {}".format(name, " | ".join(str(i) for i in inputs)))
                 with open(path, "w") as output:
                     for idx, i in enumerate(inputs):
                         if idx > 0:

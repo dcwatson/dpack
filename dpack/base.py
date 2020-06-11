@@ -34,14 +34,20 @@ class Input:
 
 
 class DPack:
-    def __init__(self, config=None, **options):
+    def __init__(self, config=None, base_dir=None, **options):
+        self.base_dir = base_dir
         config_opts = self.load_config(config or "dpack.yaml", raise_if_missing=bool(config))
         config_opts.update(options)
         self.configure(config_opts)
 
+    def resolve(self, path):
+        if path.startswith("/") or not self.base_dir:
+            return path
+        return os.path.abspath(os.path.normpath(os.path.join(self.base_dir, path)))
+
     def load_config(self, config_file, raise_if_missing=False):
         try:
-            with open(config_file, "r") as f:
+            with open(self.resolve(config_file), "r") as f:
                 return yaml.safe_load(f)
         except FileNotFoundError as e:
             if raise_if_missing:
@@ -77,9 +83,9 @@ class DPack:
         self.location = config.get("output") or tempfile.mkdtemp(prefix="dpack-")
         self.ephemeral = not config.get("output")
         self.search = config.get("search", ".")
-        self.prefix = config.get("prefix", "")
         if isinstance(self.search, str):
             self.search = [self.search]
+        self.prefix = config.get("prefix", "")
         self.processors = {name: "dpack.processors.{}.process".format(name) for name in builtin_processors}
         self.processors.update(config.get("register", {}))
         self.defaults = {"css": ["rewrite"]}
@@ -94,13 +100,17 @@ class DPack:
         self.concat.update(config.get("concat", {}))
         self.assets = config.get("assets", {})
 
+    @property
+    def storage_path(self):
+        return self.resolve(self.location)
+
     def find_input(self, name):
         """
         Returns the full path of the specified input name, if it exists. By default, all directories in self.search
         are searched.
         """
         for root in self.search:
-            path = os.path.join(root, name)
+            path = os.path.join(self.resolve(root), name)
             if os.path.exists(path):
                 return path
         return None
@@ -153,7 +163,7 @@ class DPack:
         for name, inputs in self.iter_assets():
             if asset and asset != name:
                 continue
-            path = os.path.join(self.location, name)
+            path = self.resolve(os.path.join(self.location, name))
             mtime = os.path.getmtime(path) if os.path.exists(path) else 0
             if force or mtime == 0 or self.modified(inputs, mtime):
                 ext = os.path.splitext(name)[1].replace(".", "").lower()

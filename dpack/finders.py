@@ -18,7 +18,8 @@ class DjangoDPack(DPack):
         options.update(overrides)
         if "prefix" not in options:
             options["prefix"] = settings.STATIC_URL
-        super().__init__(config, **options)
+        base_dir = getattr(settings, "BASE_DIR", None)
+        super().__init__(config, base_dir=base_dir, **options)
 
     def find_input(self, name):
         for finder in get_finders():
@@ -34,7 +35,7 @@ class DjangoDPack(DPack):
 class DPackFinder(BaseFinder):
     def __init__(self, *args, **kwargs):
         self.packer = DjangoDPack()
-        self.storage = FileSystemStorage(self.packer.location)
+        self.storage = FileSystemStorage(self.packer.storage_path)
 
     def check(self, **kwargs):
         errors = []

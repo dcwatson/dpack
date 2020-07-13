@@ -154,6 +154,22 @@ class DPack:
                 return True
         return False
 
+    def pack_to(self, asset, output, encoding="utf-8"):
+        """
+        Packs a single asset directly into an output buffer with the specified encoding. Used when serving assets
+        directly for development.
+        """
+        for name, inputs in self.iter_assets():
+            if asset != name:
+                continue
+            ext = os.path.splitext(name)[1].replace(".", "").lower()
+            sep = self.concat.get(ext, "\n").encode(encoding)
+            logger.debug("Packing {} <<< {}".format(name, " | ".join(str(i) for i in inputs)))
+            for idx, i in enumerate(inputs):
+                if idx > 0:
+                    output.write(sep)
+                output.write(i.process(self).encode(encoding))
+
     def pack(self, asset=None, force=False):
         """
         Packs one or all assets. By default, assets will only be packed if they have not been previously packed, or if

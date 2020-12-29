@@ -16,6 +16,8 @@ class DjangoDPack(DPack):
             config = dpack_setting if isinstance(dpack_setting, str) else None
         options = dpack_setting if isinstance(dpack_setting, dict) else {}
         options.update(overrides)
+        if "output" not in options:
+            options["output"] = settings.STATIC_ROOT
         if "prefix" not in options:
             options["prefix"] = settings.STATIC_URL
         base_dir = getattr(settings, "BASE_DIR", None)

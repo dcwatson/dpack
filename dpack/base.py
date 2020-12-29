@@ -1,3 +1,4 @@
+import glob
 import importlib
 import logging
 import os
@@ -11,16 +12,26 @@ logger = logging.getLogger("dpack")
 
 
 class Input:
-    def __init__(self, name, path, processors=None):
+    def __init__(self, name, path, processors=None, depends=None):
         self.name = name
         self.path = path
-        self.processors = processors
+        self.processors = processors or []
+        self.depends = depends or []
 
     def __str__(self):
         return self.name
 
+    def check_paths(self):
+        yield self.path
+        root = os.path.dirname(self.path)
+        for dep in self.depends:
+            yield from glob.iglob(os.path.join(root, dep))
+
     def modified(self, mtime):
-        return os.path.getmtime(self.path) > mtime
+        for path in self.check_paths():
+            if os.path.getmtime(path) > mtime:
+                return True
+        return False
 
     def process(self, packer):
         with open(self.path, "r") as f:
@@ -124,6 +135,12 @@ class DPack:
                 specs = [specs]
             inputs = []
             for spec in specs:
+                if isinstance(spec, str):
+                    depends = []
+                elif isinstance(spec, dict):
+                    spec, depends = list(spec.items())[0]
+                else:
+                    raise ValueError("Unknown input type: {}".format(spec))
                 *processors, input_name = spec.split(":")
                 if processors:
                     # cssmin:sass:somefile.sass should process as cssmin(sass(somefile.sass))
@@ -139,7 +156,7 @@ class DPack:
                 processors = [self.processors[proc] for proc in processors]
                 path = self.find_input(input_name)
                 if path:
-                    inputs.append(Input(input_name, path, processors))
+                    inputs.append(Input(input_name, path, processors, depends))
                 else:
                     # TODO: should probably raise an exception here, with an option to ignore missing inputs.
                     logger.error("Input not found: {}".format(input_name))

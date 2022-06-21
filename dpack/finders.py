@@ -45,7 +45,8 @@ class DPackFinder(BaseFinder):
             errors.append(
                 Warning(
                     "You have not specified any assets to pack.",
-                    hint='Make sure you specify an "assets" dict in your dpack.yaml or DPACK setting.',
+                    hint='Make sure you specify an "assets" dict in your dpack.yaml '
+                    "or DPACK setting.",
                     id="dpack.W001",
                 )
             )

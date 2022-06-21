@@ -47,11 +47,14 @@ class Input:
 class DPack:
     def __init__(self, config=None, base_dir=None, **options):
         self.base_dir = base_dir
-        config_opts = self.load_config(config or "dpack.yaml", raise_if_missing=bool(config))
+        config_opts = self.load_config(
+            config or "dpack.yaml", raise_if_missing=bool(config)
+        )
         config_opts.update(options)
         self.configure(config_opts)
 
     def resolve(self, path):
+        path = str(path)
         if path.startswith("/") or not self.base_dir:
             return path
         return os.path.abspath(os.path.normpath(os.path.join(self.base_dir, path)))
@@ -72,7 +75,11 @@ class DPack:
         concat = self.concat.copy()
         if concat.get("js") == "\n;\n":
             concat.pop("js")
-        register = {name: method for name, method in self.processors.items() if name not in builtin_processors}
+        register = {
+            name: method
+            for name, method in self.processors.items()
+            if name not in builtin_processors
+        }
         config = {
             "assets": self.assets,
         }
@@ -97,7 +104,10 @@ class DPack:
         if isinstance(self.search, str):
             self.search = [self.search]
         self.prefix = config.get("prefix", "")
-        self.processors = {name: "dpack.processors.{}.process".format(name) for name in builtin_processors}
+        self.processors = {
+            name: "dpack.processors.{}.process".format(name)
+            for name in builtin_processors
+        }
         self.processors.update(config.get("register", {}))
         self.defaults = {"css": ["rewrite"]}
         for name, procs in config.get("defaults", {}).items():
@@ -117,8 +127,8 @@ class DPack:
 
     def find_input(self, name):
         """
-        Returns the full path of the specified input name, if it exists. By default, all directories in self.search
-        are searched.
+        Returns the full path of the specified input name, if it exists. By default,
+        all directories in self.search are searched.
         """
         for root in self.search:
             path = os.path.join(self.resolve(root), name)
@@ -143,7 +153,7 @@ class DPack:
                     raise ValueError("Unknown input type: {}".format(spec))
                 *processors, input_name = spec.split(":")
                 if processors:
-                    # cssmin:sass:somefile.sass should process as cssmin(sass(somefile.sass))
+                    # cssmin:sass:somefile.sass --> cssmin(sass(somefile.sass))
                     processors = list(reversed(processors))
                 else:
                     ext = os.path.splitext(input_name)[1].replace(".", "").lower()
@@ -158,7 +168,8 @@ class DPack:
                 if path:
                     inputs.append(Input(input_name, path, processors, depends))
                 else:
-                    # TODO: should probably raise an exception here, with an option to ignore missing inputs.
+                    # TODO: should probably raise an exception here, with an option to
+                    # ignore missing inputs.
                     logger.error("Input not found: {}".format(input_name))
             yield name, inputs
 
@@ -173,15 +184,17 @@ class DPack:
 
     def pack_to(self, asset, output, encoding="utf-8"):
         """
-        Packs a single asset directly into an output buffer with the specified encoding. Used when serving assets
-        directly for development.
+        Packs a single asset directly into an output buffer with the specified encoding.
+        Used when serving assets directly for development.
         """
         for name, inputs in self.iter_assets():
             if asset != name:
                 continue
             ext = os.path.splitext(name)[1].replace(".", "").lower()
             sep = self.concat.get(ext, "\n").encode(encoding)
-            logger.debug("Packing {} <<< {}".format(name, " | ".join(str(i) for i in inputs)))
+            logger.debug(
+                "Packing {} <<< {}".format(name, " | ".join(str(i) for i in inputs))
+            )
             for idx, i in enumerate(inputs):
                 if idx > 0:
                     output.write(sep)
@@ -189,9 +202,10 @@ class DPack:
 
     def pack(self, asset=None, force=False):
         """
-        Packs one or all assets. By default, assets will only be packed if they have not been previously packed, or if
-        any of the inputs to an asset have changed since the last time it was packed. To force packing, set force=True.
-        To pack only a single asset, specify a path.
+        Packs one or all assets. By default, assets will only be packed if they have not
+        been previously packed, or if any of the inputs to an asset have changed since
+        the last time it was packed. To force packing, set force=True. To pack only a
+        single asset, specify a path.
         """
         for name, inputs in self.iter_assets():
             if asset and asset != name:
@@ -202,7 +216,9 @@ class DPack:
                 ext = os.path.splitext(name)[1].replace(".", "").lower()
                 sep = self.concat.get(ext, "\n")
                 os.makedirs(os.path.dirname(path), exist_ok=True)
-                logger.debug("Packing {} <<< {}".format(name, " | ".join(str(i) for i in inputs)))
+                logger.debug(
+                    "Packing {} <<< {}".format(name, " | ".join(str(i) for i in inputs))
+                )
                 with open(path, "w") as output:
                     for idx, i in enumerate(inputs):
                         if idx > 0:

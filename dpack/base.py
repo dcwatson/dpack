@@ -34,7 +34,7 @@ class Input:
         return False
 
     def process(self, packer):
-        with open(self.path, "r") as f:
+        with open(self.path, "r", encoding="utf-8") as f:
             text = f.read()
         for proc in self.processors:
             module_name, method_name = proc.rsplit(".", 1)
@@ -61,7 +61,7 @@ class DPack:
 
     def load_config(self, config_file, raise_if_missing=False):
         try:
-            with open(self.resolve(config_file), "r") as f:
+            with open(self.resolve(config_file), "r", encoding="utf-8") as f:
                 return yaml.safe_load(f)
         except FileNotFoundError as e:
             if raise_if_missing:
@@ -219,7 +219,7 @@ class DPack:
                 logger.debug(
                     "Packing {} <<< {}".format(name, " | ".join(str(i) for i in inputs))
                 )
-                with open(path, "w") as output:
+                with open(path, "w", encoding="utf-8") as output:
                     for idx, i in enumerate(inputs):
                         if idx > 0:
                             output.write(sep)

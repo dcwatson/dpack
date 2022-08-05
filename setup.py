@@ -2,10 +2,10 @@ import re
 
 from setuptools import find_packages, setup
 
-with open("README.md", "r") as readme:
+with open("README.md", "r", encoding="utf-8") as readme:
     long_description = readme.read()
 
-with open("dpack/__init__.py", "r") as src:
+with open("dpack/__init__.py", "r", encoding="utf-8") as src:
     version = re.match(r'.*__version__ = "(.*?)"', src.read(), re.S).group(1)
 
 setup(

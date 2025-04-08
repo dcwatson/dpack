@@ -1,0 +1,51 @@
+[project]
+name = "dpack"
+dynamic = ["version"]
+description = "Asset packager for Django."
+authors = [
+    { name = "Dan Watson", email = "dcwatson@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pyyaml>=6.0.2",
+]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+
+[project.optional-dependencies]
+cssmin = ["rcssmin"]
+jsmin = ["rjsmin"]
+sass = ["libsass"]
+all = ["rcssmin", "rjsmin", "libsass"]
+
+[project.scripts]
+dpack= "dpack.cli:main"
+
+[dependency-groups]
+dev = [
+    "django>=4.2.20",
+    "libsass>=0.23.0",
+    "rcssmin>=1.2.1",
+    "rjsmin>=1.2.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/dpack/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dpack"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+isort.known-first-party = ["dpack"]

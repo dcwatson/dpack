@@ -52,12 +52,14 @@ class DPackFinder(BaseFinder):
             )
         return errors
 
-    def find(self, path, all=False):
+    def find(self, path, find_all=False, **kwargs):
+        if kwargs:
+            find_all = self._check_deprecated_find_param(find_all=find_all, **kwargs)
         # Only pack the path being searched for, and only if it's out of date.
         if path in self.packer.assets:
             self.packer.pack(path)
             full_path = os.path.join(self.packer.location, path)
-            return [full_path] if all else full_path
+            return [full_path] if find_all else full_path
         return []
 
     def list(self, ignore_patterns):

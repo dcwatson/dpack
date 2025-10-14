@@ -32,7 +32,7 @@ are available:
   declarations in CSS files via the `rewrite` processor. If using `DPackFinder`, this defaults to `STATIC_URL`.
 * `register` - a dictionary whose keys are processor names you wish to register (or override), and whose values are
   dotted-path strings that resolve to a callable. See processors below.
-* `search` - a list of directories to search for input files in. If using `DPackFinder`, input files will be searches
+* `search` - a list of directories to search for input files in. If using `DPackFinder`, input files will be searched
   by using any `STATICFILES_FINDERS` that are not `DPackFinder` itself.
 
 ### Example `dpack.yaml`

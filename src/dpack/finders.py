@@ -53,8 +53,11 @@ class DPackFinder(BaseFinder):
         return errors
 
     def find(self, path, find_all=False, **kwargs):
-        if kwargs:
-            find_all = self._check_deprecated_find_param(find_all=find_all, **kwargs)
+        if "all" in kwargs:
+            # The `all` kwargs is deprecated, but `_check_deprecated_find_param` doesn't
+            # exist before 5.2, so we do this ourselves. Remove this when dropping
+            # support for Django < 5.2.
+            find_all = kwargs.pop("all")
         # Only pack the path being searched for, and only if it's out of date.
         if path in self.packer.assets:
             self.packer.pack(path)

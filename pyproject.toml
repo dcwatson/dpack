@@ -1,6 +1,6 @@
 [project]
 name = "dpack"
-version = "0.6.0"
+version = "0.6.1"
 description = "Asset packager for Django."
 authors = [
     { name = "Dan Watson", email = "dcwatson@gmail.com" }
